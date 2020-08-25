@@ -71,6 +71,7 @@ export default {
       this.imgElement.src = url;
       this.canvas.clear();
       this.canvas.setBackgroundImage(this.imgInstance);
+     
     },
 
     drawRect(t, l, w, h) {
@@ -136,9 +137,9 @@ export default {
         alert(this.contextMenuItems[key].name);
       }
     },
+    
   },
   mounted() {
-     
     //  设置图片缩略图
     var galleryThumbs = new Swiper(".gallery-thumbs", {
       spaceBetween: 10,
@@ -165,7 +166,7 @@ export default {
     this.imgElement = document.getElementById("img");
     this.canvas = new fabric.Canvas("canvas");
   
-    $('canvas').css("background-size","150px 123px");
+    // $('canvas').css("background-size","150px 123px");
     this.imgInstance = new fabric.Image(this.imgElement, {
       //设置图片在canvas中的位置和样子
       left: 0,
@@ -178,23 +179,24 @@ export default {
     });
 
 
-     window.onload = function () {
-      //添加右击事件
-      $(".upper-canvas").contextmenu(this.onContextmenu);
-      //初始化右键菜单
-      $.contextMenu({
-        selector: "#contextmenu-output",
-        trigger: "none",
-        build: function ($trigger, e) {
-          //构建菜单项build方法在每次右键点击会执行
-          return {
-            callback: this.contextMenuClick,
-            items: this.contextMenuItems,
-          };
-        },
-      });
+    //  window.onload = function () {
+    //   //添加右击事件
+    //   $(".upper-canvas").contextmenu(this.onContextmenu);
+    //   //初始化右键菜单
+    //   $.contextMenu({
+    //     selector: "#contextmenu-output",
+    //     trigger: "none",
+    //     build: function ($trigger, e) {
+    //       //构建菜单项build方法在每次右键点击会执行
+    //       return {
+    //         callback: this.contextMenuClick,
+    //         items: this.contextMenuItems,
+    //       };
+        
+    //     },
+    //   });
       
-    }
+    // }
 
     this.canvas.setBackgroundImage(this.imgInstance);
     this.canvas.selections = false; //取消框选
@@ -205,6 +207,7 @@ export default {
       var y = options.e.clientY;
       this.firstPoint = { x: x, y: y };
       console.log("start", options.e.clientX, options.e.clientY);
+      
     });
 
     this.canvas.on("mouse:move", function (options) {
@@ -232,7 +235,19 @@ export default {
       //console.log("up", options.e.clientX, options.e.clientY)
     });
     // $(".upper-canvas").contextmenu(this.addLabel);
-
+    $(".upper-canvas").contextmenu(this.onContextmenu);
+       $.contextMenu({
+        selector: "#contextmenu-output",
+        trigger: "none",
+        build: function ($trigger, e) {
+          //构建菜单项build方法在每次右键点击会执行
+          return {
+            callback: this.contextMenuClick,
+            items: this.contextMenuItems,
+          };
+        
+        },
+      });
    
   },
 };
