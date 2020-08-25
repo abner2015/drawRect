@@ -32,6 +32,18 @@
         ></div>
       </div>
     </div>
+
+    <ul class="context-menu-list context-menu-root" style="width: 208px; top: 318px; left: 388px; display:none;">
+        <li class="context-menu-item context-menu-icon context-menu-icon-delete" @click="changeKey(1)">
+          <span>删除</span>
+        </li>
+        <li class="context-menu-item context-menu-icon context-menu-icon-add" @click="changeKey(2)">
+          <span>新增标签</span>
+        </li>
+        <li class="context-menu-item context-menu-icon context-menu-icon-label" @click="changeKey(3)">
+          <span>标签</span>
+        </li>
+    </ul>
   </div>
 </template>
 
@@ -62,6 +74,8 @@ export default {
       lastPoint: {},
       contextMenuItems: {},
       position:{},
+      key:"",
+      object: {}
     };
   },
   methods: {
@@ -73,7 +87,14 @@ export default {
       this.canvas.setBackgroundImage(this.imgInstance);
      
     },
-
+    changeKey(num){
+      if(num==1){
+         this.key = "delete";
+      }else if(num==3){
+        this.key = "label";
+      }
+       this.contextMenuClick();
+    },
     drawRect(t, l, w, h) {
       var rect = new fabric.Rect({
         top: l, //距离画布上边的距离
@@ -90,56 +111,67 @@ export default {
       this.canvas.add(rect);
     },
    onContextmenu(event) {
-     console.log("右键");
+     //console.log("右键");
+    //阻止系统右键菜单
+      event.preventDefault();
       var pointer = this.canvas.getPointer(event.originalEvent);
       var objects = this.canvas.getObjects();
+       //console.log("this#############")
       for (var i = objects.length - 1; i >= 0; i--) {
-        var object = objects[i];
+        this.object = objects[i];
         //判断该对象是否在鼠标点击处
-        if (this.canvas.containsPoint(event, object)) {
+        if (this.canvas.containsPoint(event, this.object)) {
           //选中该对象
-          this.canvas.setActiveObject(object);
+          this.canvas.setActiveObject(this.object);
           //alert("你好，我是一个警告框！")
           //显示菜单
-          this.showContextMenu(event, object);
-          //alert("eee")
+          //this.showContextMenu(event, object);
+         //显示右击菜单，获取选中的key值，并且调用contextMenuClick
+         //console.log(event.clientX);
+         $(".context-menu-root").css("left",event.clientX).css("top",event.clientY).css("z-index",99999999999).show();
+        
+         
           continue;
         }
       }
-
-      //阻止系统右键菜单
-      event.preventDefault();
       return false;
+      
     },
-    showContextMenu(event, object) {
-      //定义右键菜单项
-      this.contextMenuItems = {
-        delete: { name: "删除", icon: "delete", data: object },
-        add: { name: "新增标签", icon: "add", data: object },
-        label: { name: "标签", icon: "label", data: object },
-      };
-      //右键菜单显示位置
-      this.position = {
-        x: event.clientX,
-        y: event.clientY,
-      };
-      //alert("dfnk")
-      // 显示菜单
-      $("#contextmenu-output").contextMenu(this.position);
-    },
-    contextMenuClick(key, options) {
-      consolo.log("click 右键");
-      if (key == "delete") {
+    // showContextMenu(event, object) {
+    //   //定义右键菜单项
+    //   this.contextMenuItems = {
+    //     delete: { name: "删除", icon: "delete", data: object },
+    //     add: { name: "新增标签", icon: "add", data: object },
+    //     label: { name: "标签", icon: "label", data: object },
+    //   };
+    //   //右键菜单显示位置
+    //   this.position = {
+    //     x: event.clientX,
+    //     y: event.clientY,
+    //   };
+    //   // 显示菜单
+    //   $("#contextmenu-output").contextMenu(this.position);
+    //   console.log("hhahahahahahah")
+    // },
+    contextMenuClick() {
+     // alert(this.key);
+      if (this.key == "delete") {
         //得到对应的object并删除
-        var object = this.contextMenuItems[key].data;
+        var object = this.contextMenuItems[this.key].data;
         this.canvas.remove(object);
-      } else if ((key = "label")) {
-        alert(this.contextMenuItems[key].name);
+      } else if ((this.key = "label")) {
+        alert(this.contextMenuItems[this.key].name);
       }
     },
     
   },
   mounted() {
+    //定义右键菜单项
+      this.contextMenuItems = {
+        delete: { name: "删除", icon: "delete", data: this.object },
+        add: { name: "新增标签", icon: "add", data: this.object },
+        label: { name: "标签", icon: "label", data: this.object },
+      };
     //  设置图片缩略图
     var galleryThumbs = new Swiper(".gallery-thumbs", {
       spaceBetween: 10,
@@ -236,18 +268,18 @@ export default {
     });
     // $(".upper-canvas").contextmenu(this.addLabel);
     $(".upper-canvas").contextmenu(this.onContextmenu);
-       $.contextMenu({
-        selector: "#contextmenu-output",
-        trigger: "none",
-        build: function ($trigger, e) {
-          //构建菜单项build方法在每次右键点击会执行
-          return {
-            callback: this.contextMenuClick,
-            items: this.contextMenuItems,
-          };
+      //  $.contextMenu({
+      //   selector: "#contextmenu-output",
+      //   trigger: "none",
+      //   build: function ($trigger, e) {
+      //     //构建菜单项build方法在每次右键点击会执行
+      //     return {
+      //       callback: this.contextMenuClick,
+      //       items: this.contextMenuItems,
+      //     };
         
-        },
-      });
+      //   },
+      // });
    
   },
 };
@@ -330,5 +362,31 @@ body {
 
 .gallery-thumbs .swiper-slide-thumb-active {
   opacity: 1;
+}
+
+.context-menu-icon::before {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 2em;
+    font-family: context-menu-icons;
+    font-size: 1em;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1;
+    color: #2980b9;
+    text-align: center;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    -o-transform: translateY(-50%);
+    transform: translateY(-50%);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+.context-menu-icon-delete:before {
+    content: "\EA04";
+}
+.context-menu-icon-add:before {
+    content: "\EA01";
 }
 </style>
